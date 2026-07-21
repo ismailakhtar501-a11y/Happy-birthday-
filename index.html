@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday Sadia</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+body, html {
+margin: 0; padding: 0; width: 100%; height: 100%;
+background: #030107; overflow: hidden;
+font-family: 'Poppins', sans-serif;
+}
+canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
+
+/* Gift Box Opening Animation Overlay */
+.gift-wrapper {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+text-align: center;
+z-index: 25;
+cursor: pointer;
+transition: opacity 0.5s ease;
+}
+.gift-box-icon {
+font-size: 6rem;
+filter: drop-shadow(0 0 25px rgba(255, 105, 180, 0.8));
+animation: giftBounce 2s infinite ease-in-out;
+}
+.gift-prompt {
+color: #ffe4e1;
+margin-top: 15px;
+font-size: 1.1rem;
+font-weight: 600;
+letter-spacing: 2px;
+text-shadow: 0 0 10px #ff1493;
+animation: pulseText 1.5s infinite alternate;
+}
+@keyframes giftBounce {
+0%, 100% { transform: translateY(0) scale(1); }
+50% { transform: translateY(-15px) scale(1.05); }
+}
+@keyframes pulseText {
+0% { opacity: 0.7; }
+100% { opacity: 1; }
+}
+.gift-open-anim {
+animation: explodeGift 0.8s forwards !important;
+}
+@keyframes explodeGift {
+0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; pointer-events: none; }
+}
+
+/* Content strictly positioned inside the Heart boundary */
+.content {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+text-align: center;
+z-index: 2;
+pointer-events: none;
+width: 70%;
+max-width: 270px;
+opacity: 0;
+transition: opacity 1s ease-in-out;
+}
+
+.typing-text {
+font-size: clamp(0.85rem, 3vw, 1.1rem);
+color: #ffffff;
+letter-spacing: 2px;
+text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+font-weight: 300;
+}
+
+.typing-name {
+font-family: 'Pacifico', cursive;
+font-size: clamp(1.8rem, 6vw, 2.6rem);
+color: #ff85c1;
+margin-top: 5px;
+text-shadow: 0 0 15px #ff1493, 0 0 30px #ff69b4;
+}
+
+.blessing-msg {
+font-size: clamp(0.75rem, 2.5vw, 0.9rem);
+color: #ffe4e1;
+margin-top: 8px;
+opacity: 0;
+transition: opacity 2s ease-in-out;
+text-shadow: 0 0 6px rgba(255, 182, 193, 0.8);
+line-height: 1.4;
+font-weight: 400;
+}
+
+.cursor {
+display: inline-block;
+background-color: #ff85c1;
+width: 2px;
+animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+0%, 100% { opacity: 1; }
+50% { opacity: 0; }
+}
+
+.audio-alert {
+position: fixed;
+bottom: 25px;
+left: 50%;
+transform: translateX(-50%);
+background: rgba(219, 48, 85, 0.9);
+color: white;
+padding: 10px 20px;
+border-radius: 8px;
+font-size: 0.9rem;
+z-index: 30;
+box-shadow: 0 0 15px rgba(0,0,0,0.5);
+animation: fadeInOut 5s forwards;
+}
+@keyframes fadeInOut {
+0% { opacity: 0; transform: translate(-50%, 20px); }
+15% { opacity: 1; transform: translate(-50%, 0); }
+85% { opacity: 1; transform: translate(-50%, 0); }
+100% { opacity: 0; transform: translate(-50%, 20px); pointer-events: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Interactive Gift Box Opening -->
+<div id="giftWrapper" class="gift-wrapper" onclick="startExperience()">
+<div class="gift-box-icon">🎁</div>
+<div class="gift-prompt">Tap to Open</div>
+</div>
+
+<div id="mainContent" class="content">
+<div id="line1" class="typing-text"></div>
+<div id="line2" class="typing-name"></div>
+<div id="blessing" class="blessing-msg">May Allah bless you with happiness, health, success and endless smiles. Happy Birthday, Sadia ❤️</div>
+</div>
+
+<canvas id="c"></canvas>
+
+<audio id="bgMusic" loop><source src="birthday.mp3" type="audio/mpeg"></audio>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let w, h;
+
+function resize() {
+w = canvas.width = window.innerWidth;
+h = canvas.height = window.innerHeight;
+}
+window.onresize = resize;
+resize();
+
+// Aurora Background Optimized
+let auroraTime = 0;
+function drawAurora(timestamp) {
+auroraTime += 0.0015;
+ctx.save();
+ctx.globalCompositeOperation = 'lighter';
+for (let i = 0; i < 2; i++) {
+ctx.beginPath();
+ctx.moveTo(0, h * 0.3);
+for (let x = 0; x < w; x += 60) {
+let y = h * 0.3 + Math.sin(x * 0.003 + auroraTime + i) * 80 + Math.cos(x * 0.002 - auroraTime * 1.5) * 50;
+ctx.lineTo(x, y);
+}
+ctx.lineTo(w, 0);
+ctx.lineTo(0, 0);
+let grad = ctx.createLinearGradient(0, 0, 0, h * 0.5);
+if (i === 0) {
+grad.addColorStop(0, 'rgba(0, 255, 200, 0.03)');
+grad.addColorStop(1, 'transparent');
+} else {
+grad.addColorStop(0, 'rgba(255, 105, 180, 0.03)');
+grad.addColorStop(1, 'transparent');
+}
+ctx.fillStyle = grad;
+ctx.fill();
+}
+ctx.restore();
+}
+
+// Golden Glitter Effects
+let goldGlitter = [];
+for (let i = 0; i < 35; i++) {
+goldGlitter.push({
+x: Math.random() * w, y: Math.random() * h,
+size: Math.random() * 2 + 0.8,
+speedY: (Math.random() - 0.5) * 0.4,
+speedX: (Math.random() - 0.5) * 0.4,
+alpha: Math.random()
+});
+}
+
+// Shooting Stars System
+let shootingStars = [];
+function createShootingStar() {
+shootingStars.push({
+x: Math.random() * w * 0.7,
+y: 0,
+length: Math.random() * 80 + 40,
+speed: Math.random() * 10 + 6,
+angle: Math.PI / 4 + (Math.random() - 0.5) * 0.2,
+opacity: 1,
+decay: Math.random() * 0.03 + 0.015
+});
+}
+
+// Orbiting Particles around Heart
+let orbitParticles = [];
+for (let i = 0; i < 25; i++) {
+orbitParticles.push({
+angle: Math.random() * Math.PI * 2,
+radius: Math.random() * 80 + 130,
+speed: (Math.random() - 0.5) * 0.04 + 0.025,
+size: Math.random() * 2 + 1,
+color: Math.random() > 0.4 ? '#ffd700' : '#ffffff'
+});
+}
+
+// Roses / Rose Petals Animation
+let roses = [];
+for (let i = 0; i < 15; i++) {
+roses.push({
+x: Math.random() * w,
+y: Math.random() * -h,
+size: Math.random() * 8 + 5,
+speedY: Math.random() * 1 + 0.6,
+swing: Math.random() * 2,
+angle: Math.random() * Math.PI,
+color: Math.random() > 0.5 ? 'rgba(220, 20, 60, 0.6)' : 'rgba(255, 105, 180, 0.55)'
+});
+}
+
+// Confetti Explosion System
+let confetti = [];
+function triggerConfetti() {
+const colors = ['#ff69b4', '#ffd700', '#00ffff', '#ff1493', '#ffffff', '#da70d6'];
+for (let i = 0; i < 80; i++) {
+confetti.push({
+x: w / 2, y: h / 2,
+vx: (Math.random() - 0.5) * 12,
+vy: (Math.random() - 0.5) * 12 - 3,
+size: Math.random() * 7 + 3,
+color: colors[Math.floor(Math.random() * colors.length)],
+alpha: 1,
+decay: Math.random() * 0.012 + 0.006,
+rot: Math.random() * 360,
+vRot: (Math.random() - 0.5) * 8
+});
+}
+}
+
+// High-Performance Fireworks System
+const fwColors = ['#ff69b4', '#da70d6', '#ffd700', '#ffffff', '#ff1493', '#00ffff', '#ffb6c1'];
+let fireworks = [];
+function createFirework(x, y, big = false) {
+let particles = [];
+let count = big ? 90 : 45;
+let chosenColor = fwColors[Math.floor(Math.random() * fwColors.length)];
+let shapeType = Math.floor(Math.random() * 3);
+
+for (let i = 0; i < count; i++) {
+let vx, vy;
+if (shapeType === 0) {
+let angle = Math.random() * Math.PI * 2;
+let speed = Math.random() * (big ? 7 : 4) + 1;
+vx = Math.cos(angle) * speed;
+vy = Math.sin(angle) * speed;
+} else if (shapeType === 1) {
+let angle = (i / count) * Math.PI * 2;
+let speed = big ? 5 : 3;
+vx = Math.cos(angle) * speed;
+vy = Math.sin(angle) * speed;
+} else {
+let t = (i / count) * Math.PI * 2;
+let hx = 16 * Math.pow(Math.sin(t), 3);
+let hy = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+let speedFactor = big ? 0.35 : 0.22;
+vx = hx * speedFactor;
+vy = hy * speedFactor;
+}
+
+particles.push({
+x: x, y: y,
+vx: vx, vy: vy,
+alpha: 1,
+decay: Math.random() * 0.012 + 0.007,
+color: Math.random() > 0.25 ? chosenColor : '#ffffff'
+});
+}
+fireworks.push(particles);
+}
+
+// Heart Points Calculation
+const points = [];
+for (let t = 0; t < Math.PI * 2; t += 0.03) {
+let x = 16 * Math.pow(Math.sin(t), 3);
+let y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+points.push({x: x, y: y});
+}
+
+let index = 0;
+let isAnimating = false;
+let heartComplete = false;
+let heartCompleteTime = 0;
+let grandFireworksDone = false;
+let confettiTriggeredFlag = false;
+
+let text1 = "HAPPY BIRTHDAY";
+let text2 = "SADIA ✨";
+let charIndex1 = 0;
+let charIndex2 = 0;
+let typingTriggered = false;
+
+function startTypingEngine() {
+if (typingTriggered) return;
+typingTriggered = true;
+typeWriterStep1();
+}
+
+function typeWriterStep1() {
+if (charIndex1 < text1.length) {
+document.getElementById('line1').innerHTML = text1.substring(0, charIndex1 + 1) + '<span class="cursor"> </span>';
+charIndex1++;
+setTimeout(typeWriterStep1, 75);
+} else {
+document.getElementById('line1').innerHTML = text1;
+typeWriterStep2();
+}
+}
+
+function typeWriterStep2() {
+if (charIndex2 < text2.length) {
+document.getElementById('line2').innerHTML = text2.substring(0, charIndex2 + 1) + '<span class="cursor"> </span>';
+charIndex2++;
+setTimeout(typeWriterStep2, 90);
+} else {
+document.getElementById('line2').innerHTML = text2;
+setTimeout(() => {
+document.getElementById('blessing').style.opacity = 1;
+}, 400);
+}
+}
+
+// Audio Volume Fade
+let isFadingIn = false;
+let fadeStartTime = 0;
+const fadeDuration = 2000;
+const music = document.getElementById('bgMusic');
+
+function updateAudioFade(timestamp) {
+if (isFadingIn) {
+if (!fadeStartTime) fadeStartTime = timestamp;
+let elapsed = timestamp - fadeStartTime;
+let progress = Math.min(elapsed / fadeDuration, 1);
+music.volume = progress;
+if (progress >= 1) isFadingIn = false;
+}
+}
+
+let animationFrameId;
+
+function animate(timestamp) {
+updateAudioFade(timestamp);
+
+ctx.fillStyle = '#030107';
+ctx.fillRect(0, 0, w, h);
+
+drawAurora(timestamp);
+
+goldGlitter.forEach(gg => {
+gg.x += gg.speedX; gg.y += gg.speedY;
+if (gg.x < 0) gg.x = w; if (gg.x > w) gg.x = 0;
+if (gg.y < 0) gg.y = h; if (gg.y > h) gg.y = 0;
+ctx.save();
+ctx.fillStyle = '#ffd700';
+ctx.shadowBlur = 6;
+ctx.shadowColor = '#ffd700';
+ctx.globalAlpha = Math.abs(Math.sin(timestamp * 0.003 + gg.alpha));
+ctx.beginPath();
+ctx.arc(gg.x, gg.y, gg.size, 0, Math.PI * 2);
+ctx.fill();
+ctx.restore();
+});
+
+if (isAnimating && Math.random() < 0.006) {
+createShootingStar();
+}
+
+for (let i = shootingStars.length - 1; i >= 0; i--) {
+let ss = shootingStars[i];
+ss.x += Math.cos(ss.angle) * ss.speed;
+ss.y += Math.sin(ss.angle) * ss.speed;
+ss.opacity -= ss.decay;
+if (ss.opacity <= 0 || ss.x > w || ss.y > h) {
+shootingStars.splice(i, 1);
+continue;
+}
+ctx.save();
+let grad = ctx.createLinearGradient(ss.x, ss.y, ss.x - Math.cos(ss.angle) * ss.length, ss.y - Math.sin(ss.angle) * ss.length);
+grad.addColorStop(0, rgba(255, 255, 255, ${ss.opacity}));
+grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+ctx.strokeStyle = grad;
+ctx.lineWidth = 1.8;
+ctx.beginPath();
+ctx.moveTo(ss.x, ss.y);
+ctx.lineTo(ss.x - Math.cos(ss.angle) * ss.length, ss.y - Math.sin(ss.angle) * ss.length);
+ctx.stroke();
+ctx.restore();
+}
+
+roses.forEach(rs => {
+if (isAnimating) {
+rs.y += rs.speedY;
+rs.angle += 0.02;
+rs.x += Math.sin(rs.angle) * rs.swing;
+if (rs.y > h + 20) {
+rs.y = -20;
+rs.x = Math.random() * w;
+}
+}
+ctx.save();
+ctx.fillStyle = rs.color;
+ctx.beginPath();
+ctx.ellipse(rs.x, rs.y, rs.size, rs.size * 0.6, rs.angle, 0, Math.PI * 2);
+ctx.fill();
+ctx.restore();
+});
+
+if (isAnimating && index < points.length) {
+index += 1.3;
+if (index >= points.length) {
+index = points.length;
+if (!heartComplete) {
+heartComplete = true;
+heartCompleteTime = timestamp;
+}
+}
+}
+
+let heartbeat = 1;
+let glowVal = 16;
+let timeElapsedSinceComplete = heartComplete ? (timestamp - heartCompleteTime) : 0;
+
+if (heartComplete) {
+if (!confettiTriggeredFlag) {
+confettiTriggeredFlag = true;
+triggerConfetti();
+}
+
+if (!grandFireworksDone && timeElapsedSinceComplete > 300) {
+grandFireworksDone = true;
+createFirework(w * 0.2, h * 0.25, true);
+setTimeout(() => createFirework(w * 0.8, h * 0.3, true), 400);
+setTimeout(() => createFirework(w * 0.5, h * 0.2, true), 800);
+}
+
+if (timeElapsedSinceComplete > 2000) {
+let beatSine = Math.sin(timestamp / 200);
+heartbeat = 1 + beatSine * 0.07;
+glowVal = 16 + beatSine * 10;
+startTypingEngine();
+}
+}
+
+if (heartComplete && Math.random() < 0.025) {
+createFirework(Math.random() * (w - 200) + 100, Math.random() * (h * 0.45));
+}
+
+for (let i = fireworks.length - 1; i >= 0; i--) {
+let fw = fireworks[i];
+let allDead = true;
+for (let j = fw.length - 1; j >= 0; j--) {
+let p = fw[j];
+p.x += p.vx; p.y += p.vy;
+p.vy += 0.04;
+p.alpha -= p.decay;
+if (p.alpha < 0) p.alpha = 0;
+else allDead = false;
+
+ctx.save();
+ctx.globalAlpha = p.alpha;
+ctx.fillStyle = p.color;
+ctx.shadowBlur = 8;
+ctx.shadowColor = p.color;
+ctx.beginPath();
+ctx.arc(p.x, p.y, 2.2, 0, Math.PI * 2);
+ctx.fill();
+ctx.restore();
+}
+if (fw[0].alpha <= 0 || allDead) {
+fireworks.splice(i, 1);
+}
+}
+
+for (let i = confetti.length - 1; i >= 0; i--) {
+let cf = confetti[i];
+cf.x += cf.vx; cf.y += cf.vy;
+cf.vy += 0.22;
+cf.rot += cf.vRot;
+cf.alpha -= cf.decay;
+if (cf.alpha <= 0 || cf.y > h) {
+confetti.splice(i, 1);
+continue;
+}
+ctx.save();
+ctx.globalAlpha = cf.alpha;
+ctx.fillStyle = cf.color;
+ctx.translate(cf.x, cf.y);
+ctx.rotate(cf.rot * Math.PI / 180);
+ctx.fillRect(-cf.size/2, -cf.size/2, cf.size, cf.size * 0.6);
+ctx.restore();
+}
+
+let scale = Math.min(w, h) / 26;
+
+if (heartComplete && timeElapsedSinceComplete < 3000) {
+ctx.save();
+orbitParticles.forEach(op => {
+op.angle += op.speed;
+let ox = w/2 + Math.cos(op.angle) * op.radius * heartbeat;
+let oy = h/2 + Math.sin(op.angle) * op.radius * 0.8 * heartbeat;
+ctx.fillStyle = op.color;
+ctx.shadowBlur = 12;
+ctx.shadowColor = op.color;
+ctx.beginPath();
+ctx.arc(ox, oy, op.size * heartbeat, 0, Math.PI * 2);
+ctx.fill();
+});
+ctx.restore();
+}
+
+if (heartComplete && timeElapsedSinceComplete > 1000) {
+ctx.save();
+ctx.beginPath();
+for (let i = 0; i < points.length; i++) {
+let px = w/2 + points[i].x * scale * heartbeat;
+let py = h/2 + points[i].y * scale * heartbeat;
+if (i === 0) ctx.moveTo(px, py);
+else ctx.lineTo(px, py);
+}
+ctx.closePath();
+let fillGrad = ctx.createRadialGradient(w/2, h/2, 10, w/2, h/2, scale * 15);
+fillGrad.addColorStop(0, 'rgba(255, 105, 180, 0.35)');
+fillGrad.addColorStop(1, 'rgba(255, 20, 147, 0.02)');
+ctx.fillStyle = fillGrad;
+ctx.fill();
+ctx.restore();
+}
+
+ctx.shadowBlur = glowVal;
+ctx.shadowColor = '#ff69b4';
+ctx.fillStyle = '#ff1493';
+
+let currentDrawCount = Math.min(Math.floor(index), points.length);
+let dynamicDotSize = 2.5 * heartbeat;
+for (let i = 0; i < currentDrawCount; i++) {
+let px = w/2 + points[i].x * scale * heartbeat;
+let py = h/2 + points[i].y * scale * heartbeat;
+ctx.beginPath();
+ctx.arc(px, py, dynamicDotSize, 0, Math.PI * 2);
+ctx.fill();
+}
+
+animationFrameId = requestAnimationFrame(animate);
+}
+
+animationFrameId = requestAnimationFrame(animate);
+
+document.addEventListener('visibilitychange', () => {
+if (document.hidden) {
+cancelAnimationFrame(animationFrameId);
+if (isAnimating && !music.paused) music.pause();
+} else {
+if (isAnimating && music.paused) music.play().catch(e => {});
+cancelAnimationFrame(animationFrameId);
+animationFrameId = requestAnimationFrame(animate);
+}
+});
+
+function showAudioAlert() {
+if (document.getElementById('audioAlert')) return;
+let alertBox = document.createElement('div');
+alertBox.id = 'audioAlert';
+alertBox.className = 'audio-alert';
+alertBox.innerText = '⚠️ نوٹ: "birthday.mp3" فائل موجود نہیں ہے، اس لیے میوزک نہیں چل سکا۔';
+document.body.appendChild(alertBox);
+setTimeout(() => alertBox.remove(), 5000);
+}
+
+music.onerror = () => {
+showAudioAlert();
+};
+
+function startExperience() {
+const giftWrapper = document.getElementById('giftWrapper');
+giftWrapper.classList.add('gift-open-anim');
+setTimeout(() => {
+giftWrapper.style.display = 'none';
+document.getElementById('mainContent').style.opacity = 1;
+}, 700);
+
+music.volume = 0;
+music.play().then(() => {
+isFadingIn = true;
+fadeStartTime = 0;
+}).catch(e => {
+showAudioAlert();
+});
+
+isAnimating = true;
+}
+</script>
+</body>
+</html>

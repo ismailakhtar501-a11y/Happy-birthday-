@@ -15,7 +15,7 @@
         }
         canvas { display: block; position: absolute; top: 0; left: 0; z-index: 1; }
 
-        /* Gift Box Opening Animation Overlay */
+        /* Gift Box Opening Animation Overlay with Touch Fix */
         .gift-wrapper {
             position: absolute;
             top: 50%;
@@ -31,7 +31,7 @@
             touch-action: manipulation;
         }
         .gift-wrapper * {
-            pointer-events: none; /* Ensures touch goes directly to wrapper */
+            pointer-events: none;
         }
         .gift-box-icon {
             font-size: 6rem;
@@ -245,6 +245,21 @@
             });
         }
 
+        // Balloons Floating Animation Setup
+        let balloons = [];
+        const balloonColors = ['rgba(255, 105, 180, 0.75)', 'rgba(255, 215, 0, 0.75)', 'rgba(0, 255, 255, 0.65)', 'rgba(255, 20, 147, 0.75)', 'rgba(186, 85, 211, 0.75)'];
+        for (let i = 0; i < 12; i++) {
+            balloons.push({
+                x: Math.random() * w,
+                y: h + Math.random() * h,
+                radius: Math.random() * 16 + 12,
+                speedY: Math.random() * 0.8 + 0.5,
+                wobble: Math.random() * Math.PI * 2,
+                wobbleSpeed: Math.random() * 0.03 + 0.01,
+                color: balloonColors[Math.floor(Math.random() * balloonColors.length)]
+            });
+        }
+
         let confetti = [];
         function triggerConfetti() {
             const colors = ['#ff69b4', '#ffd700', '#00ffff', '#ff1493', '#ffffff', '#da70d6'];
@@ -435,6 +450,45 @@
                 ctx.ellipse(rs.x, rs.y, rs.size, rs.size * 0.6, rs.angle, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
+            });
+
+            // Draw Floating Balloons
+            balloons.forEach(b => {
+                if (isAnimating) {
+                    b.y -= b.speedY;
+                    b.wobble += b.wobbleSpeed;
+                    let currentX = b.x + Math.sin(b.wobble) * 15;
+                    if (b.y < -50) {
+                        b.y = h + 50;
+                        b.x = Math.random() * w;
+                    }
+
+                    ctx.save();
+                    ctx.fillStyle = b.color;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = b.color;
+                    // Balloon body
+                    ctx.beginPath();
+                    ctx.ellipse(currentX, b.y, b.radius, b.radius * 1.25, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Balloon knot
+                    ctx.beginPath();
+                    ctx.moveTo(currentX - 3, b.y + b.radius * 1.25);
+                    ctx.lineTo(currentX + 3, b.y + b.radius * 1.25);
+                    ctx.lineTo(currentX, b.y + b.radius * 1.25 + 6);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Balloon string
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+                    ctx.lineWidth = 1.2;
+                    ctx.beginPath();
+                    ctx.moveTo(currentX, b.y + b.radius * 1.25 + 6);
+                    ctx.quadraticCurveTo(currentX + 10, b.y + b.radius * 1.25 + 30, currentX, b.y + b.radius * 1.25 + 60);
+                    ctx.stroke();
+                    ctx.restore();
+                }
             });
 
             if (isAnimating && index < points.length) {
